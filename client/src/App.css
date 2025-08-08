@@ -1,0 +1,92 @@
+/* App.css */
+body.dark-mode {
+  background-color: #121212;
+  color: white;
+}
+
+body.light-mode {
+  background-color: #f5f5f5;
+  color: #111;
+}
+
+.App {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.language-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-mode {
+  padding: 8px 12px;
+  background-color: #1abc9c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+textarea {
+  width: 100%;
+  height: 150px;
+  padding: 12px;
+  font-family: monospace;
+  font-size: 14px;
+  background-color: #2c2c2c;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 6px;
+  resize: vertical;
+  margin-bottom: 15px;
+}
+
+.light-mode textarea {
+  background-color: #fff;
+  color: #111;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 10px 18px;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.output {
+  margin-top: 20px;
+  background-color: #1e1e1e;
+  padding: 15px;
+  border-radius: 6px;
+}
+
+.light-mode .output {
+  background-color: #e8e8e8;
+  color: #111;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
