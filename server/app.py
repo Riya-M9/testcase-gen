@@ -1,48 +1,42 @@
-# Importing required libraries
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 
-# Creating the Flask app
 app = Flask(__name__)
-CORS(app)  # Enabling CORS so the frontend can call this API
+CORS(app)  # Allow React frontend to connect to this backend
 
-# Endpoint to receive code and return test cases
-@app.route('/generate-test-cases', methods=['POST'])
-def generate_test_cases():
-    data = request.get_json()
-
-    # Extracting code and language from the request body
-    code = data.get('code')
-    language = data.get('language')
-
-    if not code or not language:
-        return jsonify({'error': 'Code or language missing'}), 400
-
-    # Constructing the prompt for the local AI model (Ollama)
-    prompt = f"Generate some useful and minimal test cases for the following {language} function:\n\n{code}"
-
-    # Sending the prompt to the Ollama API running locally
+# This route receives code and description from frontend and uses Ollama to generate test cases
+@app.route("/generate-testcases", methods=["POST"])
+def generate_testcases():
     try:
+        # Get the JSON data sent from frontend
+        data = request.get_json()
+        code = data.get("code", "")
+        description = data.get("description", "")
+
+        # Basic input validation (optional, but helpful)
+        if not code or not description:
+            return jsonify({"error": "Missing code or description"}), 400
+
+        # Build a prompt for Ollama (you can tweak this)
+        prompt = f"Given the following code:\n{code}\n\nAnd the description:\n{description}\n\nGenerate relevant test cases."
+
+        # Send the prompt to your local Ollama server
         ollama_response = requests.post(
-            'http://localhost:11434/api/generate',
-            json={
-                "model": "codellama",
-                "prompt": prompt,
-                "stream": False  # We want the full output, not chunks
-            }
+            "http://localhost:11434/api/generate",
+            json={"model": "llama3", "prompt": prompt, "stream": False}
         )
 
-        if ollama_response.status_code == 200:
-            response_json = ollama_response.json()
-            return jsonify({'testCases': response_json.get('response', 'No response received')})
-        else:
-            return jsonify({'error': 'Failed to get response from Ollama'}), 500
+        # Parse response and return to frontend
+        result = ollama_response.json()
+        output = result.get("response", "No response from model.")
+
+        return jsonify({"output": output})
 
     except Exception as e:
-        print("Exception while generating test cases:", e)
-        return jsonify({'error': 'Something went wrong while calling Ollama'}), 500
+        # Return error if anything fails
+        return jsonify({"error": str(e)}), 500
 
-# Starting the Flask server
-if __name__ == '__main__':
+# Run the app on port 5000
+if __name__ == "__main__":
     app.run(debug=True)

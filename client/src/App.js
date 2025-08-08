@@ -1,72 +1,67 @@
-// App.js
 import React, { useState } from "react";
 import "./App.css";
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [language, setLanguage] = useState("JavaScript");
+  // State hooks for input fields and output
   const [code, setCode] = useState("");
+  const [description, setDescription] = useState("");
   const [output, setOutput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(true); // for theme toggle
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    document.body.className = isDarkMode ? "light-mode" : "dark-mode";
-  };
-
-  const handleLanguageChange = (e) => {
-    setLanguage(e.target.value);
-  };
-
-  const handleCodeChange = (e) => {
-    setCode(e.target.value);
-  };
-
+  // Function to handle button click and send data to backend
   const generateTestCases = async () => {
+    setLoading(true);  // Show loading state
+    setOutput("");     // Clear previous output
+
     try {
       const response = await fetch("http://localhost:5000/generate-testcases", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, language }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ code, description })
       });
 
       const data = await response.json();
-      setOutput(data.test_cases || "No output received.");
-    } catch (err) {
-      setOutput("Error: " + err.message);
+
+      if (data.output) {
+        setOutput(data.output);
+      } else {
+        setOutput("Error: " + (data.error || "No output received"));
+      }
+    } catch (error) {
+      setOutput("Fetch Error: " + error.message);
+    } finally {
+      setLoading(false);  // Done loading
     }
   };
 
   return (
-    <div className="App">
-      <h1>🧪 Offline Test Case Generator</h1>
-
-      <div className="top-bar">
-        <div className="language-selector">
-          <label>Choose Language:</label>
-          <select value={language} onChange={handleLanguageChange}>
-            <option value="JavaScript">JavaScript</option>
-            <option value="Python">Python</option>
-            <option value="Java">Java</option>
-          </select>
-        </div>
-
-        <button className="toggle-mode" onClick={toggleTheme}>
-          {isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        </button>
-      </div>
+    <div className={darkMode ? "app dark" : "app light"}>
+      <h1>Test Case Generator</h1>
 
       <textarea
-        placeholder="Paste your function code here..."
+        placeholder="Paste your code here..."
         value={code}
-        onChange={handleCodeChange}
+        onChange={(e) => setCode(e.target.value)}
       />
 
-      <button onClick={generateTestCases}>Generate Test Cases</button>
+      <textarea
+        placeholder="Write a brief description of the function or code..."
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
 
-      <div className="output">
-        <h3>Generated Test Cases:</h3>
-        <pre>{output}</pre>
-      </div>
+      <button onClick={generateTestCases} disabled={loading}>
+        {loading ? "Generating..." : "Generate Test Cases"}
+      </button>
+
+      <button onClick={() => setDarkMode(!darkMode)} className="toggle-btn">
+        Switch to {darkMode ? "Light" : "Dark"} Mode
+      </button>
+
+      <pre className="output-box">{output}</pre>
     </div>
   );
 }
