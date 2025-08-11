@@ -1,65 +1,115 @@
-.app {
-  text-align: center;
-  padding: 2rem;
-  font-family: "Segoe UI", sans-serif;
-  transition: background 0.4s, color 0.4s;
+/* Base Styles */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.App {
   min-height: 100vh;
+  transition: all 0.3s ease;
 }
 
-textarea {
-  width: 80%;
-  min-height: 100px;
+/* Dark Mode */
+.App.dark {
+  background: #1a1a2e;
+  color: #e6f7ff;
+}
+
+.App.dark .file-explorer,
+.App.dark .test-case-results {
+  background: #16213e;
+  border-color: #0f3460;
+}
+
+/* Header */
+.App-header {
+  padding: 2rem;
+  text-align: center;
+}
+
+h1, h2 {
+  color: #00b4d8;
+}
+
+/* Mode Toggle */
+.mode-toggle {
+  background: transparent;
+  border: 2px solid #00b4d8;
+  color: inherit;
+  padding: 0.5rem 1rem;
   margin: 1rem 0;
-  padding: 1rem;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  resize: vertical;
-  font-size: 1rem;
-}
-
-button {
-  margin: 0.5rem;
-  padding: 0.7rem 1.5rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s;
 }
 
-button:hover {
-  opacity: 0.9;
+.mode-toggle:hover {
+  background: #00b4d8;
+  color: #fff;
 }
 
-.toggle-btn {
-  background-color: #5b9bd5;
-  color: white;
-}
-
-.app.dark {
-  background-color: #0f172a;
-  color: white;
-}
-
-.app.dark textarea {
-  background-color: #1e293b;
-  color: white;
-  border: 1px solid #334155;
-}
-
-.app.light {
-  background-color: #f3faff;
-  color: #1e293b;
-}
-
-.output-box {
-  width: 80%;
+/* File Explorer */
+.file-explorer {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
   margin: 2rem auto;
-  background-color: #e6f0ff;
-  color: #003366;
+  max-width: 800px;
+}
+
+.App.dark .file-explorer {
+  background: #16213e;
+}
+
+.file-explorer ul {
+  list-style: none;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.file-explorer li {
+  padding: 0.8rem;
+  margin: 0.5rem 0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.file-explorer li:not(.selected):hover {
+  background: #e2e6ea;
+}
+
+.App.dark .file-explorer li:not(.selected):hover {
+  background: #0f3460;
+}
+
+.file-explorer .selected {
+  background: #00b4d8;
+  color: white;
+}
+
+/* Test Case Results */
+.test-case-results {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.test-case {
+  background: white;
   padding: 1rem;
-  border-radius: 10px;
-  text-align: left;
+  margin: 1rem 0;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.App.dark .test-case {
+  background: #0f3460;
+  color: #e6f7ff;
+}
+
+pre {
+  margin: 0;
   white-space: pre-wrap;
-  word-wrap: break-word;
 }

@@ -1,67 +1,94 @@
-import React, { useState } from "react";
-import "./App.css";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './App.css';
 
 function App() {
-  // State hooks for input fields and output
-  const [code, setCode] = useState("");
-  const [description, setDescription] = useState("");
-  const [output, setOutput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [darkMode, setDarkMode] = useState(true); // for theme toggle
+  const [darkMode, setDarkMode] = useState(false);
+  const [files, setFiles] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [testCases, setTestCases] = useState([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  // Function to handle button click and send data to backend
-  const generateTestCases = async () => {
-    setLoading(true);  // Show loading state
-    setOutput("");     // Clear previous output
+  // Toggle dark/light mode
+  const toggleDarkMode = () => setDarkMode(!darkMode);
 
+  // Fetch GitHub files from backend
+  const fetchFiles = async () => {
     try {
-      const response = await fetch("http://localhost:5000/generate-testcases", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ code, description })
-      });
-
-      const data = await response.json();
-
-      if (data.output) {
-        setOutput(data.output);
-      } else {
-        setOutput("Error: " + (data.error || "No output received"));
-      }
+      const response = await axios.get('http://localhost:5000/api/github/files');
+      setFiles(response.data);
     } catch (error) {
-      setOutput("Fetch Error: " + error.message);
-    } finally {
-      setLoading(false);  // Done loading
+      console.error("Error fetching files:", error);
     }
   };
 
+  // Generate test cases via AI
+  const generateTestCases = async () => {
+    if (selectedFiles.length === 0) return;
+    setIsGenerating(true);
+    try {
+      const response = await axios.post('http://localhost:5000/api/generate_test_cases', {
+        files: selectedFiles.map(file => file.name)
+      });
+      setTestCases(response.data);
+    } catch (error) {
+      console.error("AI generation failed:", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Toggle file selection
+  const toggleFileSelection = (file) => {
+    setSelectedFiles(prev => 
+      prev.some(f => f.id === file.id) 
+        ? prev.filter(f => f.id !== file.id) 
+        : [...prev, file]
+    );
+  };
+
+  useEffect(() => { fetchFiles(); }, []);
+
   return (
-    <div className={darkMode ? "app dark" : "app light"}>
-      <h1>Test Case Generator</h1>
+    <div className={`App ${darkMode ? 'dark' : ''}`}>
+      <header className="App-header">
+        <h1>Test Case Generator</h1>
+        <button onClick={toggleDarkMode} className="mode-toggle">
+          {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+        </button>
 
-      <textarea
-        placeholder="Paste your code here..."
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-      />
+        <div className="file-explorer">
+          <h2>Select GitHub Files</h2>
+          <ul>
+            {files.map(file => (
+              <li 
+                key={file.id} 
+                className={selectedFiles.some(f => f.id === file.id) ? 'selected' : ''}
+                onClick={() => toggleFileSelection(file)}
+              >
+                📄 {file.name}
+              </li>
+            ))}
+          </ul>
+          <button 
+            onClick={generateTestCases} 
+            disabled={selectedFiles.length === 0 || isGenerating}
+          >
+            {isGenerating ? 'Generating...' : 'Generate Test Cases'}
+          </button>
+        </div>
 
-      <textarea
-        placeholder="Write a brief description of the function or code..."
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-
-      <button onClick={generateTestCases} disabled={loading}>
-        {loading ? "Generating..." : "Generate Test Cases"}
-      </button>
-
-      <button onClick={() => setDarkMode(!darkMode)} className="toggle-btn">
-        Switch to {darkMode ? "Light" : "Dark"} Mode
-      </button>
-
-      <pre className="output-box">{output}</pre>
+        {testCases.length > 0 && (
+          <div className="test-case-results">
+            <h2>Generated Test Cases</h2>
+            {testCases.map((testCase, index) => (
+              <div key={index} className="test-case">
+                <pre>{testCase}</pre>
+              </div>
+            ))}
+          </div>
+        )}
+      </header>
     </div>
   );
 }
